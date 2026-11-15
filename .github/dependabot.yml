@@ -14,6 +14,11 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "deps"
+    ignore:
+      # xattr 0.2.3 (via gpui_http_client) still refers to libc::ENOATTR,
+      # which libc removed for Linux in 0.2.187. Keep the explicit 0.2.186
+      # pin until GPUI's dependency chain updates.
+      - dependency-name: "libc"
 
   - package-ecosystem: "github-actions"
     directory: "/"
