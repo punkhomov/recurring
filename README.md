@@ -69,8 +69,10 @@ artifact.
   headless-скриншот.
 - `.github/workflows/release.yml` — по тегу `v*` собирает переносимые архивы
   для Linux и Windows, считает SHA-256 и публикует GitHub Release.
-- `.github/dependabot.yml` — обновления Cargo и GitHub Actions с cooldown
-  **7 дней**.
+- `.cargo/config.toml` — Cargo не резолвит версии моложе **14 дней**
+  (`global-min-publish-age`).
+- `.github/dependabot.yml` — обновления Cargo и GitHub Actions с тем же
+  cooldown **14 дней**.
 
 Локальная проверка релизной сборки:
 
@@ -80,18 +82,28 @@ cargo build --release --locked -p recurring-app
 
 ## Supabase
 
-Схема и RLS уже лежат в [`supabase/migrations`](supabase/migrations). Инструкция
-по подключению проекта — в [`supabase/README.md`](supabase/README.md).
+Схема и RLS уже лежат в [`supabase/migrations`](supabase/migrations). Пошаговая
+инструкция, настройка email OTP и правила безопасности — в
+[`supabase/README.md`](supabase/README.md).
 
 Коротко:
 
 ```bash
+supabase init
 supabase link --project-ref <project-ref>
 supabase db push
 ```
 
-В приложении будет только `anon` key. `service_role` в клиент не попадает
-никогда; доступ ограничен RLS по `auth.uid()`.
+В приложении будет только **publishable key** (`sb_publishable_...`) или
+legacy `anon` key. Они предназначены для публичных клиентов. `sb_secret_...`,
+`service_role`, пароль БД и Supabase access token в репозиторий и в чат не
+попадают никогда. Доступ ограничен RLS по `auth.uid()`.
+
+Для локальной разработки:
+
+```bash
+cp .env.example .env   # заполнить URL и publishable key, .env в .gitignore
+```
 
 ## Структура
 
@@ -108,10 +120,13 @@ scripts/          Linux-зависимости, headless-скриншот
 ## Политика обновлений
 
 - Версия Rust зафиксирована в `rust-toolchain.toml` (`1.100.0`) — это явное
-  требование проекта, хотя релиз 1.100.0 младше недели.
-- Новые версии зависимостей и actions принимаются только через 7 дней после
-  релиза (Dependabot `cooldown.default-days: 7`); будущие обновления Rust
-  следуют тому же правилу.
+  требование проекта, хотя релиз 1.100.0 младше двух недель.
+- Cargo не выбирает версии пакетов, опубликованные меньше **14 дней** назад:
+  `.cargo/config.toml` → `registry.global-min-publish-age = "14 days"`.
+- Dependabot использует тот же 14-дневный cooldown для Cargo и GitHub Actions.
+- `Cargo.lock` перегенерирован с нуля под это правило. При срочном security-
+  фиксе проверку можно точечно снять:
+  `CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE=allow cargo update -p <crate> --precise <version>`.
 - GPUI обновляется осознанно: это pre-1.0, автоматические minor-апдейты могут
   ломать API.
 

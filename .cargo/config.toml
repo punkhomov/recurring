@@ -1,0 +1,11 @@
+# Supply-chain cooldown: never resolve a crate version published less than
+# 14 days ago. Cargo 1.100+ understands this natively (RFC 3923).
+#
+# A version already present in Cargo.lock is kept; this policy applies to new
+# resolutions and updates. To override for an urgent security fix:
+#   CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE=allow cargo update -p <crate> --precise <version>
+[registry]
+global-min-publish-age = "14 days"
+
+[resolver]
+incompatible-publish-age = "deny"

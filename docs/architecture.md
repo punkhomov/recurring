@@ -48,7 +48,7 @@ GPUI views
        Supabase REST (reqwest)  ← polling on start, focus, and every N minutes
 ```
 
-- **Identity**: Supabase Auth, single user. Email OTP is the preferred login:
+- **Identity**: Supabase Auth, single user. Email OTP is the accepted login:
   no browser callback server or deep-link plumbing is needed.
 - **Secrets**: refresh token in the OS keychain (`keyring`): Secret Service on
   Linux, Credential Manager on Windows. Never in the repo or SQLite.
@@ -72,9 +72,9 @@ GPUI renders with Blade over Vulkan on Linux and Direct3D on Windows. The app
 uses a small design-token module instead of a theme framework, a 236 px
 sidebar, a list of event rows, and in-memory demo data until SQLite lands.
 
-The window is a normal desktop window. Tray icon and OS notifications are
-planned as a separate layer: `ksni` (StatusNotifierItem over D-Bus) on Linux
-and a message-only window + `Shell_NotifyIcon` on Windows. GPUI does not ship a
+The window is a normal desktop window. Tray icon and OS notifications are a v1
+requirement, implemented as a separate layer: `ksni` (StatusNotifierItem over
+D-Bus) on Linux and a message-only window + `Shell_NotifyIcon` on Windows. GPUI does not ship a
 tray API, and GTK-based tray crates would fight GPUI's event loop, so this needs
 its own small platform module.
 
@@ -110,6 +110,9 @@ would couple the mobile schedule to Zed's desktop release cadence.
 
 ## Operational constraints
 
+- Cargo resolves only crate versions published at least 14 days ago
+  (`.cargo/config.toml`, native Cargo 1.100 min-publish-age). Dependabot uses
+  the same 14-day cooldown.
 - Supabase free projects pause after about a week of inactivity. Sync must
   surface that as a recoverable "project paused/offline" state.
 - Free plans have no point-in-time recovery. The app will expose JSON export;

@@ -8,9 +8,9 @@ updates:
       day: "monday"
       time: "06:00"
       timezone: "Europe/Moscow"
-    # Do not adopt a release until it has been public for a week.
+    # Keep bot updates aligned with Cargo's 14-day publish-age policy.
     cooldown:
-      default-days: 7
+      default-days: 14
     open-pull-requests-limit: 5
     commit-message:
       prefix: "deps"
@@ -23,7 +23,7 @@ updates:
       time: "06:00"
       timezone: "Europe/Moscow"
     cooldown:
-      default-days: 7
+      default-days: 14
     open-pull-requests-limit: 5
     commit-message:
       prefix: "ci"
