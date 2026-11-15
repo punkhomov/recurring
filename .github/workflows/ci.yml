@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  lint:
+    name: Format and clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        run: ./scripts/install-linux-deps.sh
+
+      - name: Install Rust toolchain
+        run: |
+          rustup show active-toolchain
+          rustup component add rustfmt clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: linux-lint
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+  test:
+    name: Test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: ./scripts/install-linux-deps.sh
+
+      - name: Install Rust toolchain
+        run: |
+          rustup show
+          rustup component add rustfmt clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ${{ runner.os }}-test
+
+      - name: Test
+        run: cargo test --workspace --locked
+
+  screenshot:
+    name: Headless screenshot (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux dependencies and screenshot tools
+        run: ./scripts/install-linux-deps.sh --screenshot
+
+      - name: Install Rust toolchain
+        run: |
+          rustup show active-toolchain
+          rustup component add rustfmt clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: linux-screenshot
+
+      - name: Build app
+        run: cargo build -p recurring-app --locked
+
+      - name: Capture screenshot
+        run: ./scripts/screenshot-linux.sh
+
+      - name: Upload screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: artifacts/screenshots/
+          if-no-files-found: warn

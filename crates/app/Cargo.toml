@@ -1,0 +1,26 @@
+[package]
+name = "recurring-app"
+description = "GPUI desktop client for Recurring"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "recurring"
+path = "src/main.rs"
+
+[dependencies]
+chrono.workspace = true
+chrono-tz.workspace = true
+gpui.workspace = true
+libc.workspace = true
+recurring-core.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+uuid.workspace = true
+
+[lints]
+workspace = true

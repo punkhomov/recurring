@@ -1,0 +1,106 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-linux:
+    name: Linux artifact
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        run: ./scripts/install-linux-deps.sh
+
+      - name: Install Rust toolchain
+        run: |
+          rustup show active-toolchain
+          rustup component add rustfmt clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: linux-release
+
+      - name: Build release binary
+        run: cargo build --release --locked -p recurring-app
+
+      - name: Package
+        run: |
+          mkdir -p dist
+          cp target/release/recurring dist/
+          cp README.md LICENSE dist/
+          ARCHIVE="recurring-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu.tar.gz"
+          tar -C dist -czf "$ARCHIVE" .
+          sha256sum "$ARCHIVE" > "$ARCHIVE.sha256"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-artifact
+          path: |
+            recurring-*.tar.gz
+            recurring-*.tar.gz.sha256
+          if-no-files-found: error
+
+  build-windows:
+    name: Windows artifact
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        run: |
+          rustup show
+          rustup component add rustfmt clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: windows-release
+
+      - name: Build release binary
+        run: cargo build --release --locked -p recurring-app
+
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item target/release/recurring.exe dist/
+          Copy-Item README.md, LICENSE dist/
+          $archive = "recurring-$env:GITHUB_REF_NAME-x86_64-pc-windows-msvc.zip"
+          Compress-Archive -Path dist/* -DestinationPath $archive
+          $hash = (Get-FileHash $archive -Algorithm SHA256).Hash.ToLower()
+          "$hash  $archive" | Out-File -Encoding ascii "$archive.sha256"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-artifact
+          path: |
+            recurring-*.zip
+            recurring-*.zip.sha256
+          if-no-files-found: error
+
+  publish:
+    name: Publish GitHub release
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true
