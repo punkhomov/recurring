@@ -111,6 +111,7 @@ cp .env.example .env   # заполнить URL и publishable key, .env в .git
 crates/core/      домен, recurrence, деньги — без UI и сети
 crates/app/       GPUI-клиент, тема, форматирование, демо-данные
 supabase/         SQL-миграции и настройка облака
+.agents/skills/   Supabase/Postgres agent skills (MIT, pinned in skills-lock.json)
 docs/             архитектура и список решений
 scripts/          Linux-зависимости, headless-скриншот
 ```
