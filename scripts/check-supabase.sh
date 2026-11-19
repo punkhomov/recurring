@@ -40,7 +40,7 @@ echo
 
 case "$EVENTS_CODE" in
   200) echo "OK: table exists; anon must receive [] (RLS)." ;;
-  404) echo "MIGRATION NOT APPLIED: run supabase/migrations/20261115120000_init.sql." ;;
+  404) echo "MIGRATION NOT APPLIED: run supabase/migrations/20261119213845_init.sql." ;;
   401|403) echo "KEY/GRANT PROBLEM: check the publishable key and Data API exposure." ;;
   *) echo "Unexpected response; inspect the body above." ;;
 esac

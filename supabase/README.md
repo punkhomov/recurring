@@ -45,7 +45,7 @@ publishable key, but `.env` is cleaner.
 For the database migration, you do **not** need to send me credentials. Either:
 
 1. Open **SQL Editor** in the Supabase dashboard and run the contents of
-   `supabase/migrations/20261115120000_init.sql`, or
+   `supabase/migrations/20261119213845_init.sql`, or
 2. On your machine run:
 
    ```bash
@@ -79,6 +79,11 @@ The migration creates:
 - RLS policies scoped to `auth.uid()`;
 - indexes for the HLC sync cursor;
 - an `updated_at` trigger.
+
+If you apply a migration through MCP instead of the CLI, the remote migration
+version is generated when it runs. Rename the local file to that version so
+`supabase db push` does not try to apply it twice. The current remote version is
+`20261119213845_init`.
 
 After applying it, verify that the public API is closed to anonymous requests:
 
