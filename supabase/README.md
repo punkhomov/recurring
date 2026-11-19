@@ -123,6 +123,32 @@ magic-link callback server.
    user it is usually enough; if login emails get delayed, custom SMTP also
    solves that.
 
+### Brevo quick recipe
+
+1. Brevo → **Settings → SMTP & API → SMTP** → **Generate SMTP key**. Copy the
+   key; it is shown once. This is not a Brevo API key.
+2. Brevo → **Senders, Domains & Dedicated IPs**: verify a sender email, or add
+   a domain and its SPF/DKIM records. A verified sender is enough to start; an
+   authenticated domain has much better deliverability.
+3. Supabase → **Authentication → Emails → SMTP Settings**:
+   - Sender email: the verified Brevo sender.
+   - Sender name: `Recurring`.
+   - Host: `smtp-relay.brevo.com`.
+   - Port: `587` (STARTTLS) or `465` (SSL/TLS).
+   - Username: your Brevo account login email — **not** the relay host.
+   - Password: the Brevo SMTP key.
+   - Minimum interval per user: keep `60` seconds.
+4. Save. The template editor should unlock; reload the page if it still looks
+   locked.
+5. **Authentication → Emails → Templates → Magic Link**: add `{{ .Token }}`
+   to the body (and optionally the subject), then save.
+6. Test from **Authentication → Users → Send magic link**. Check
+   **Brevo → Transactional → Email logs** if it does not arrive.
+
+Custom SMTP raises Supabase's test limit from 2 messages/hour to 30/hour.
+Brevo's free plan allows 300 messages/day.
+
+
 The app flow will be:
 
 ```text
