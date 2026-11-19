@@ -68,9 +68,10 @@ not provide a tray API, so this is a small platform-specific module.
 
 ### D-008 — Email OTP authentication
 
-Accepted: email OTP with a six-digit code entered in the app. No password, no
-magic-link callback server. The Supabase session's refresh token goes into the
-OS keychain; access tokens stay in memory.
+Accepted: email OTP with a numeric code entered in the app. No password, no
+magic-link callback server. The code length is Supabase-configured (currently
+8 digits); the app must not hard-code six. The Supabase session's refresh token
+goes into the OS keychain; access tokens stay in memory.
 
 Free Supabase projects created after 2026-06-03 cannot edit auth email templates
 while using the default SMTP sender. The OTP code requires `{{ .Token }}` in the

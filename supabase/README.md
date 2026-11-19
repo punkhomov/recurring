@@ -103,15 +103,18 @@ Or run the local check, which also prints the Auth `disable_signup` flag:
 
 ## Email OTP
 
-Email OTP is the chosen login method: a six-digit code, no password and no
-magic-link callback server.
+Email OTP is the chosen login method: a numeric code, no password and no
+magic-link callback server. The length is configured in Supabase; the current
+project uses 8 digits. The app accepts the configured length rather than
+hard-coding six.
 
 1. **Authentication → Providers → Email**: enable it.
 2. **Authentication → Users**: create the single account manually with your
    email and confirm it.
 3. Disable **Allow new users to sign up**. Otherwise anyone with the
    publishable key can create accounts and consume your auth/email quota.
-4. Set the OTP length to 6 and a short expiry (10–15 minutes).
+4. Set the OTP length (6–10 digits; this project currently uses 8) and a short
+   expiry (10–15 minutes).
 5. **Authentication → Email Templates → Magic Link**: make sure the template
    contains `{{ .Token }}`. This is the code the app asks the user to type.
 6. **Important for projects created after 2026-06-03:** on the free plan with
