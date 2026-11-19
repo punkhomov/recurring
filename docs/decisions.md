@@ -72,6 +72,11 @@ Accepted: email OTP with a six-digit code entered in the app. No password, no
 magic-link callback server. The Supabase session's refresh token goes into the
 OS keychain; access tokens stay in memory.
 
+Free Supabase projects created after 2026-06-03 cannot edit auth email templates
+while using the default SMTP sender. The OTP code requires `{{ .Token }}` in the
+Magic Link template, so such a project needs custom SMTP (Resend/Brevo/etc.)
+before OTP sign-in can work.
+
 ### D-009 — Android is a later, separate client
 
 Accepted: Android comes after the desktop sync loop is stable. It will share

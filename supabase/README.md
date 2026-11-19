@@ -90,6 +90,12 @@ curl -s "$RECURRING_SUPABASE_URL/rest/v1/events?select=id" \
 
 If this returns rows, stop and check RLS before going further.
 
+Or run the local check, which also prints the Auth `disable_signup` flag:
+
+```bash
+./scripts/check-supabase.sh
+```
+
 ## Email OTP
 
 Email OTP is the chosen login method: a six-digit code, no password and no
@@ -103,9 +109,14 @@ magic-link callback server.
 4. Set the OTP length to 6 and a short expiry (10–15 minutes).
 5. **Authentication → Email Templates → Magic Link**: make sure the template
    contains `{{ .Token }}`. This is the code the app asks the user to type.
-6. The built-in email sender is rate-limited and meant for low volume. For one
-   user it is usually enough; if login emails get delayed, configure custom
-   SMTP.
+6. **Important for projects created after 2026-06-03:** on the free plan with
+   Supabase's default SMTP, the email template editor is locked. `{{ .Token }}`
+   cannot be added until you configure custom SMTP (Resend, Brevo, Mailgun,
+   etc.). That is required for the OTP flow; the default magic-link email is
+   not enough.
+7. The built-in email sender is rate-limited and meant for low volume. For one
+   user it is usually enough; if login emails get delayed, custom SMTP also
+   solves that.
 
 The app flow will be:
 
